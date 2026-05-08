@@ -1,0 +1,16 @@
+# Essentials
+torch==2.10.*
+torchvision==0.25.*
+transformers==5.8.*
+diffusers==0.37.*
+accelerate==1.13.*
+datasets==4.8.*
+# Extensions
+peft==0.19.*
+xformers==0.0.*
+bitsandbytes==0.49.*
+# Optimizers
+dadaptation==3.*
+prodigyopt==1.1.*
+# Logging
+wandb==0.26.*

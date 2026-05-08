@@ -1,0 +1,6 @@
+# IDE
+.vscode/
+
+# Directories
+/checkpoints/
+/results/
