@@ -4,3 +4,8 @@
 # Directories
 /checkpoints/
 /results/
+/data/
+
+# Artifacts
+__pycache__/
+.ipynb_checkpoints/

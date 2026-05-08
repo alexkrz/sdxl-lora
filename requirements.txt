@@ -14,3 +14,8 @@ dadaptation==3.*
 prodigyopt==1.1.*
 # Logging
 wandb==0.26.*
+# Notebook
+jupyterlab==4.5.*
+ipywidgets==1.8.*
+# Dev
+pre-commit==4.6.*
