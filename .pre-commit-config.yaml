@@ -1,6 +1,9 @@
 default_language_version:
   python: python3
 
+# Exclude training script to keep its original formatting
+exclude: ^train_dreambooth_lora_sdxl_advanced\.py$
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

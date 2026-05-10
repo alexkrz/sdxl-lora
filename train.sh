@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Parameters from notebook
-output_dir="training_logs/3d-icon-sdxl-lora"
+output_dir="training_logs"  # output_dir should not contain slashes
 instance_prompt="3d icon in the style of TOK"
 validation_prompt="a TOK icon of an astronaut riding a horse, in the style of TOK"
 rank=8
