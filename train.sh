@@ -16,7 +16,7 @@ accelerate launch train_dreambooth_lora_sdxl_advanced.py \
   --caption_column="prompt" \
   --mixed_precision="bf16" \
   --resolution=1024 \
-  --train_batch_size=3 \
+  --train_batch_size=2 \
   --repeats=1 \
   --report_to="wandb"\
   --gradient_accumulation_steps=1 \

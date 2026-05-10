@@ -6,6 +6,7 @@
 /results/
 /data/
 /training_logs/
+/wandb/
 
 # Artifacts
 __pycache__/
