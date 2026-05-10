@@ -250,6 +250,8 @@ Special VAE used for training: {vae_path}.
         "template:sd-lora",
     ]
     model_card = populate_model_card(model_card, tags=tags)
+    output_readme_path = os.path.join(repo_folder if repo_folder is not None else ".", "README.md")
+    model_card.save(output_readme_path)
 
 
 def log_validation(
@@ -2446,6 +2448,15 @@ def main(args):
             embeddings_path = f"{args.output_dir}/ti_embeddings.safetensors"
             embedding_handler.save_embeddings(embeddings_path)
 
+        # Free training objects before building the final inference pipeline.
+        # This reduces peak VRAM by avoiding overlap between training and inference model copies.
+        if "pipeline" in locals():
+            del pipeline
+        del unet, text_encoder_one, text_encoder_two, vae
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
         # Final inference
         # Load previous pipeline
         vae = AutoencoderKL.from_pretrained(
@@ -2470,20 +2481,42 @@ def main(args):
         images = []
         if args.validation_prompt and args.num_validation_images > 0:
             pipeline_args = {"prompt": args.validation_prompt, "num_inference_steps": 25}
-            images = log_validation(
-                pipeline,
-                args,
-                accelerator,
-                pipeline_args,
-                epoch,
-                is_final_validation=True,
-            )
+            try:
+                images = log_validation(
+                    pipeline,
+                    args,
+                    accelerator,
+                    pipeline_args,
+                    epoch,
+                    is_final_validation=True,
+                )
+            except torch.OutOfMemoryError as e:
+                logger.warning(
+                    "Skipping final validation because of CUDA OOM. "
+                    "Continuing to save model artifacts and model card. Error: %s",
+                    e,
+                )
+                images = []
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except RuntimeError as e:
+                if "out of memory" in str(e).lower():
+                    logger.warning(
+                        "Skipping final validation because of CUDA OOM runtime error. "
+                        "Continuing to save model artifacts and model card. Error: %s",
+                        e,
+                    )
+                    images = []
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                else:
+                    raise
 
         # Convert to WebUI format
         lora_state_dict = load_file(f"{args.output_dir}/pytorch_lora_weights.safetensors")
         peft_state_dict = convert_all_state_dict_to_peft(lora_state_dict)
         kohya_state_dict = convert_state_dict_to_kohya(peft_state_dict)
-        save_file(kohya_state_dict, f"{args.output_dir}/{Path(args.output_dir).name}.safetensors")
+        save_file(kohya_state_dict, f"{args.output_dir}/kohya_state_dict.safetensors")
 
         save_model_card(
             model_id if not args.push_to_hub else repo_id,

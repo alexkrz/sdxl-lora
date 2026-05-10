@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Parameters from notebook
-output_dir="training_logs"  # output_dir should not contain slashes
+output_dir="training_logs/3d-icon-sdxl-lora-v2"  # Need to verify that slashes work correctly in output_dir
 instance_prompt="3d icon in the style of TOK"
 validation_prompt="a TOK icon of an astronaut riding a horse, in the style of TOK"
 rank=8
@@ -31,7 +31,7 @@ accelerate launch train_dreambooth_lora_sdxl_advanced.py \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
   --rank="$rank" \
-  --max_train_steps=1000 \
+  --max_train_steps=1500 \
   --checkpointing_steps=2000 \
   --seed="0" \
   # --push_to_hub
