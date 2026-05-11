@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Parameters from notebook
-output_dir="training_logs/3d-icon-sdxl-lora-v5"  # Need to verify that slashes work correctly in output_dir
+output_dir="training_logs/3d-icon-sdxl-lora-v6"  # Need to verify that slashes work correctly in output_dir
 instance_prompt="3d icon in the style of TOK"
 validation_prompt="a TOK icon of an astronaut riding a horse, in the style of TOK"
 rank=8
@@ -12,7 +12,8 @@ accelerate launch train_dreambooth_lora_sdxl_advanced.py \
   --dataset_name="./data/3d_icon" \
   --instance_prompt="$instance_prompt" \
   --validation_prompt="$validation_prompt" \
-  --validation_epochs=50 \
+  --num_validation_images=4 \
+  --validation_epochs=30 \
   --output_dir="$output_dir" \
   --caption_column="prompt" \
   --mixed_precision="bf16" \
@@ -22,9 +23,9 @@ accelerate launch train_dreambooth_lora_sdxl_advanced.py \
   --report_to="wandb"\
   --gradient_accumulation_steps=1 \
   --gradient_checkpointing \
-  --optimizer="prodigy"\
-  --learning_rate=1.0 \
-  --text_encoder_lr=1.0 \
+  --optimizer="AdamW"\
+  --learning_rate=1e-4 \
+  --text_encoder_lr=5e-5 \
   --adam_beta1=0.9 \
   --adam_beta2=0.99 \
   --adam_weight_decay=0.01 \
