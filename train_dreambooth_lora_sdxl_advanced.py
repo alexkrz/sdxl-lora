@@ -2088,7 +2088,10 @@ def main(args):
         num_train_epochs_text_encoder = int(args.train_text_encoder_ti_frac * args.num_train_epochs)
     # flag used for textual inversion
     pivoted = False
+    epoch_loss_avg = float("nan")  # Initial epoch_loss is undefined
     for epoch in range(first_epoch, args.num_train_epochs):
+        epoch_loss_sum = 0.0
+        epoch_loss_count = 0
         unet.train()
         # if performing any kind of optimization of text_encoder params
         if args.train_text_encoder or args.train_text_encoder_ti:
@@ -2340,6 +2343,9 @@ def main(args):
                 if args.train_text_encoder_ti:
                     embedding_handler.retract_embeddings()
 
+            epoch_loss_sum += loss.detach().item()
+            epoch_loss_count += 1
+
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:
                 progress_bar.update(1)
@@ -2371,12 +2377,24 @@ def main(args):
                         accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
 
-            logs = {"loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
-            progress_bar.set_postfix(**logs)
-            accelerator.log(logs, step=global_step)
+            progress_bar.set_postfix(lr=lr_scheduler.get_last_lr()[0], epoch_loss=f"{epoch_loss_avg:.6f}")
 
             if global_step >= args.max_train_steps:
                 break
+
+        epoch_loss_stats = torch.tensor(
+            [epoch_loss_sum, float(epoch_loss_count)], device=accelerator.device, dtype=torch.float64
+        )
+        epoch_loss_stats = accelerator.reduce(epoch_loss_stats, reduction="sum")
+        epoch_loss_avg = (
+            (epoch_loss_stats[0] / epoch_loss_stats[1]).item() if epoch_loss_stats[1].item() > 0 else float("nan")
+        )
+
+        epoch_logs = {"epoch_loss": epoch_loss_avg, "lr": lr_scheduler.get_last_lr()[0], "epoch": epoch}
+        accelerator.log(epoch_logs, step=global_step)
+
+        # if accelerator.is_main_process:
+        #     logger.info(f"Epoch {epoch}: loss={epoch_loss_avg:.6f}")
 
         if accelerator.is_main_process:
             if args.validation_prompt is not None and epoch % args.validation_epochs == 0:
