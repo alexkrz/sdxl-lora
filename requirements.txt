@@ -14,6 +14,8 @@ dadaptation==3.*
 prodigyopt==1.1.*
 # Logging
 wandb==0.26.*
+tensorboard==2.20.*
+setuptools==81.*  # We need to pin setuptools for compatibility wiht tensorboard
 # Notebook
 jupyterlab==4.5.*
 ipywidgets==1.8.*
