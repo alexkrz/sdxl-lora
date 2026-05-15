@@ -4,7 +4,7 @@ Train a SDXL LoRA adapter as described here: <https://huggingface.co/blog/sdxl_l
 
 ## Setup
 
-I think the future of python environment management will be `uv`.
+I believe the future of python environment management will be `uv`.
 Currently, I prefer to install the requirements in a `conda` virtual environment.
 Therefore, I suggest to set up your environment with the following commands:
 
