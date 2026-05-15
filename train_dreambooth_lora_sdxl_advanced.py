@@ -1679,7 +1679,7 @@ def main(args):
                 text_encoder_2_lora_layers=text_encoder_two_lora_layers_to_save,
             )
         if args.train_text_encoder_ti:
-            embedding_handler.save_embeddings(f"{args.output_dir}/{Path(args.output_dir).name}_emb.safetensors")
+            embedding_handler.save_embeddings(os.path.join(output_dir, "ti_embeddings.safetensors"))
 
     def load_model_hook(models, input_dir):
         unet_ = None
